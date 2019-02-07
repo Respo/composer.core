@@ -17,9 +17,9 @@
 (def site
   {:dev-ui "http://localhost:8100/main.css",
    :release-ui "http://cdn.tiye.me/favored-fonts/main.css",
-   :cdn-url "http://cdn.tiye.me/calcit-workflow/",
-   :cdn-folder "tiye.me:cdn/composer.renderer",
-   :title "Composer Renderer",
+   :cdn-url "http://cdn.tiye.me/composer/",
+   :cdn-folder "tiye.me:cdn/composer",
+   :title "Composer",
    :icon "http://cdn.tiye.me/logo/respo.png",
-   :storage-key "composer.renderer",
-   :upload-folder "tiye.me:repo/Respo/composer.renderer/"})
+   :storage-key "composer",
+   :upload-folder "tiye.me:repo/Respo/composer/"})

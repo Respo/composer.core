@@ -1,12 +1,12 @@
 
-(ns app.page
+(ns respo-composer.page
   (:require [respo.render.html :refer [make-string]]
             [shell-page.core :refer [make-page spit slurp]]
-            [app.comp.container :refer [comp-container]]
-            [app.schema :as schema]
+            [respo-composer.comp.container :refer [comp-container]]
+            [respo-composer.schema :as schema]
             [reel.schema :as reel-schema]
             [cljs.reader :refer [read-string]]
-            [app.config :as config]
+            [respo-composer.config :as config]
             [cumulo-util.build :refer [get-ip!]])
   (:require-macros [clojure.core.strint :refer [<<]]))
 

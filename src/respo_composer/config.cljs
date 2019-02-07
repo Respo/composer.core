@@ -1,5 +1,5 @@
 
-(ns app.config )
+(ns respo-composer.config )
 
 (def cdn?
   (cond

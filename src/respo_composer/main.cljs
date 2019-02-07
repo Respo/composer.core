@@ -1,14 +1,14 @@
 
-(ns app.main
+(ns respo-composer.main
   (:require [respo.core :refer [render! clear-cache! realize-ssr!]]
-            [app.comp.container :refer [comp-container]]
-            [app.updater :refer [updater]]
-            [app.schema :as schema]
+            [respo-composer.comp.container :refer [comp-container]]
+            [respo-composer.updater :refer [updater]]
+            [respo-composer.schema :as schema]
             [reel.util :refer [listen-devtools!]]
             [reel.core :refer [reel-updater refresh-reel]]
             [reel.schema :as reel-schema]
             [cljs.reader :refer [read-string]]
-            [app.config :as config]
+            [respo-composer.config :as config]
             [cumulo-util.core :refer [repeat!]]))
 
 (defonce *reel

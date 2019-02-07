@@ -1,6 +1,6 @@
 
-(ns app.upload
-  (:require ["child_process" :as cp] [app.config :as config])
+(ns respo-composer.upload
+  (:require ["child_process" :as cp] [respo-composer.config :as config])
   (:require-macros [clojure.core.strint :refer [<<]]))
 
 (defn sh! [command] (println command) (println (.toString (cp/execSync command))))

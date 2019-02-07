@@ -1,5 +1,5 @@
 
-(ns app.comp.container
+(ns respo-composer.comp.container
   (:require [hsl.core :refer [hsl]]
             [respo-ui.core :as ui]
             [respo.core
@@ -8,7 +8,7 @@
             [respo.comp.space :refer [=<]]
             [reel.comp.reel :refer [comp-reel]]
             [respo-md.comp.md :refer [comp-md]]
-            [app.config :refer [dev?]]))
+            [respo-composer.config :refer [dev?]]))
 
 (defcomp
  comp-container

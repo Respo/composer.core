@@ -1,5 +1,5 @@
 
-(ns app.snippet )
+(ns respo-composer.snippet )
 
 (defn main! []
   (require '[clojure.string :as string])

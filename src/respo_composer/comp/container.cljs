@@ -8,26 +8,20 @@
             [respo.comp.space :refer [=<]]
             [reel.comp.reel :refer [comp-reel]]
             [respo-md.comp.md :refer [comp-md]]
-            [respo-composer.config :refer [dev?]]))
+            [respo-composer.config :refer [dev?]]
+            [respo-composer.comp.previewer :refer [comp-previewer]]
+            [respo-composer.comp.data-panel :refer [comp-data-panel]]))
 
 (defcomp
  comp-container
  (reel)
- (let [store (:store reel), states (:states store)]
+ (let [store (:store reel)
+       states (:states store)
+       template (:template store)
+       mock-data (:data store)
+       shadows? (:shadows? store)]
    (div
-    {:style (merge ui/global ui/row)}
-    (textarea
-     {:value (:content store),
-      :placeholder "Content",
-      :style (merge ui/flex ui/textarea {:height 320}),
-      :on-input (action-> :content (:value %e))})
-    (=< "8px" nil)
-    (div
-     {:style ui/flex}
-     (comp-md "This is some content with `code`")
-     (=< "8px" nil)
-     (button
-      {:style ui/button,
-       :inner-text (str "run"),
-       :on-click (fn [e d! m!] (println (:content store)))}))
+    {:style (merge ui/global ui/fullscreen ui/row)}
+    (comp-previewer template mock-data shadows?)
+    (cursor-> :data-panel comp-data-panel states template mock-data shadows?)
     (when dev? (cursor-> :reel comp-reel states reel {})))))

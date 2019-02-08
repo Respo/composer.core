@@ -1,4 +1,4 @@
 
 (ns respo-composer.schema )
 
-(def store {:states {}, :content ""})
+(def store {:states {}, :template nil, :data nil, :shadows? false})

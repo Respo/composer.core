@@ -10,13 +10,14 @@
             [respo-composer.config :refer [dev?]]
             [inflow-popup.comp.popup :refer [comp-popup]]
             [respo-alerts.comp.alerts :refer [comp-prompt]]
-            [cljs.reader :refer [read-string]]))
+            [cljs.reader :refer [read-string]]
+            [favored-edn.core :refer [write-edn]]))
 
 (defcomp
  comp-data-panel
  (states template mock-data shadows?)
  (div
-  {:style {:width 100, :background-color (hsl 0 0 95)}}
+  {:style {:width 160, :padding 8, :background-color (hsl 0 0 95)}}
   (div {} (<> "Settings"))
   (=< nil 8)
   (div
@@ -28,7 +29,7 @@
     {:trigger (a {:style ui/link, :inner-text "Set data"}),
      :multiline? true,
      :input-style {:font-family ui/font-code},
-     :initial (pr-str mock-data),
+     :initial (write-edn mock-data),
      :text "Paste data for template"}
     (fn [result d! m!]
       (try
@@ -43,7 +44,7 @@
     {:trigger (a {:style ui/link, :inner-text "Set template"}),
      :multiline? true,
      :input-style {:font-family ui/font-code},
-     :initial (pr-str template),
+     :initial (write-edn template),
      :text "Paste template markup"}
     (fn [result d! m!]
       (try

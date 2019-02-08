@@ -12,6 +12,7 @@
                 [respo/reel             "0.3.4"]
                 [respo/inflow-popup     "0.2.7"]
                 [cumulo/util            "0.1.4"]
+                [cirru/favored-edn      "0.1.1"]
                 [org.clojure/core.incubator "0.1.4"]]
  :repositories {"central" {:url "https://maven.aliyun.com/nexus/content/groups/public/"}
                 "clojars" {:url "https://mirrors.ustc.edu.cn/clojars/"}}

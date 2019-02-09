@@ -1,6 +1,10 @@
 
 (ns respo-composer.core
-  (:require [respo.core :refer [defcomp cursor-> list-> <> div button textarea span]]))
+  (:require [respo.core :refer [defcomp cursor-> list-> <> div button textarea span a]]
+            [respo.comp.space :refer [=<]]
+            [hsl.core :refer [hsl]]
+            [feather.core :refer [comp-icon]]
+            [respo-ui.core :as ui]))
 
 (declare render-children)
 
@@ -8,17 +12,45 @@
 
 (declare render-markup)
 
-(defn render-button [markup mock-data] (<> "TODO: button"))
+(defn str-keys [x] (->> x (map (fn [[k v]] [(name k) v])) (into {})))
 
-(defn render-icon [markup mock-data] (<> "TODO: icon"))
+(defn get-layout [layout]
+  (str-keys
+   (case layout
+     :row ui/row
+     :row-center ui/row-center
+     :row-middle ui/row-middle
+     :row-parted ui/row-parted
+     :column ui/column
+     :column-parted ui/column-parted
+     {})))
+
+(defn render-button [markup mock-data]
+  (let [props (:props markup)]
+    (button
+     {:style (merge ui/button (:style markup)), :inner-text (get props "text" "Submit")})))
+
+(defn render-icon [markup mock-data]
+  (let [props (:props markup)
+        icon-name (get props "name")
+        size (get props "size" 16)
+        color (get props "color" (hsl 200 80 70))]
+    (comp-icon icon-name (merge {:font-size size, :color color} (:style markup)) nil)))
 
 (defn render-if [markup mock-data] (<> "TODO: if"))
 
 (defn render-input [markup mock-data] (<> "TODO: input"))
 
-(defn render-link [markup mock-data] (<> "TODO: link"))
+(defn render-link [markup mock-data]
+  (<> "TODO: link")
+  (let [props (:props markup)]
+    (a {:style (merge ui/link (:style markup)), :inner-text (get props "text" "Submit")})))
 
-(defn render-space [markup mock-data] (<> "TODO space"))
+(defn use-number [x] (if (nil? x) nil (js/parseFloat x)))
+
+(defn render-space [markup mock-data]
+  (let [props (:props markup)]
+    (=< (use-number (get props "width")) (use-number (get props "height")))))
 
 (defn render-template [markup mock-data] (<> "TODO: template"))
 
@@ -27,7 +59,7 @@
 
 (defn render-value [markup mock-data] (<> "TODO: value"))
 
-(def style-unknown {:font-size 12, :color :red})
+(def style-unknown {"font-size" 12, "color" :red})
 
 (defn render-markup [markup mock-data]
   (case (:type markup)
@@ -47,6 +79,8 @@
   (->> children (sort-by first) (map (fn [[k child]] [k (render-markup child mock-data)]))))
 
 (defn render-box [markup mock-data]
+  (println
+   (merge (:attrs markup) {:style (merge (get-layout (:layout markup)) (:style markup))}))
   (list->
-   (merge (:attrs markup) {:style (:style markup)})
+   (merge (:attrs markup) {:style (merge (get-layout (:layout markup)) (:style markup))})
    (render-children (:children markup) mock-data)))

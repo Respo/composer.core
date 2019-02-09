@@ -43,7 +43,7 @@
     states
     {:trigger (a {:style ui/link, :inner-text "Set template"}),
      :multiline? true,
-     :input-style {:font-family ui/font-code},
+     :input-style {:font-family ui/font-code, :min-height 240, :font-size 12},
      :initial (write-edn template),
      :text "Paste template markup"}
     (fn [result d! m!]

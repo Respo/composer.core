@@ -42,7 +42,6 @@
 (defn render-input [markup mock-data] (<> "TODO: input"))
 
 (defn render-link [markup mock-data]
-  (<> "TODO: link")
   (let [props (:props markup)]
     (a {:style (merge ui/link (:style markup)), :inner-text (get props "text" "Submit")})))
 
@@ -61,9 +60,9 @@
 
 (def style-unknown {"font-size" 12, "color" :red})
 
-(defn render-markup [markup mock-data]
+(defn render-markup [markup mock-data templates]
   (case (:type markup)
-    :box (render-box markup mock-data)
+    :box (render-box markup mock-data templates)
     :space (render-space markup mock-data)
     :icon (render-icon markup mock-data)
     :text (render-text markup mock-data)
@@ -75,12 +74,14 @@
     :value (render-value markup mock-data)
     (div {:style style-unknown} (<> (str "Unknown type:" (:type markup))))))
 
-(defn render-children [children mock-data]
-  (->> children (sort-by first) (map (fn [[k child]] [k (render-markup child mock-data)]))))
+(defn render-children [children mock-data templates]
+  (->> children
+       (sort-by first)
+       (map (fn [[k child]] [k (render-markup child mock-data templates)]))))
 
-(defn render-box [markup mock-data]
+(defn render-box [markup mock-data templates]
   (println
    (merge (:attrs markup) {:style (merge (get-layout (:layout markup)) (:style markup))}))
   (list->
    (merge (:attrs markup) {:style (merge (get-layout (:layout markup)) (:style markup))})
-   (render-children (:children markup) mock-data)))
+   (render-children (:children markup) mock-data templates)))

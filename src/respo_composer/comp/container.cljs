@@ -17,11 +17,12 @@
  (reel)
  (let [store (:store reel)
        states (:states store)
-       template (:template store)
+       templates (:templates store)
+       pointer (:pointer store)
        mock-data (:data store)
        shadows? (:shadows? store)]
    (div
     {:style (merge ui/global ui/fullscreen ui/row)}
-    (comp-previewer template mock-data shadows?)
-    (cursor-> :data-panel comp-data-panel states template mock-data shadows?)
-    (when dev? (cursor-> :reel comp-reel states reel {})))))
+    (comp-previewer (get templates pointer) mock-data shadows? templates)
+    (cursor-> :data-panel comp-data-panel states templates pointer mock-data shadows?)
+    (when dev? (cursor-> :reel comp-reel states reel {:bottom 100})))))

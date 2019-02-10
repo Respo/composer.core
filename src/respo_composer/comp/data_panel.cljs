@@ -15,7 +15,7 @@
 
 (defcomp
  comp-data-panel
- (states template mock-data shadows?)
+ (states templates pointer mock-data shadows?)
  (div
   {:style {:width 160, :padding 8, :background-color (hsl 0 0 95)}}
   (div {} (<> "Settings"))
@@ -30,7 +30,7 @@
      :multiline? true,
      :input-style {:font-family ui/font-code},
      :initial (write-edn mock-data),
-     :text "Paste data for template"}
+     :text "Paste mock data"}
     (fn [result d! m!]
       (try
        (let [data (read-string result)] (d! :data data))
@@ -38,18 +38,28 @@
   (div
    {}
    (cursor->
-    :template
+    :templates
     comp-prompt
     states
-    {:trigger (a {:style ui/link, :inner-text "Set template"}),
+    {:trigger (a {:style ui/link, :inner-text "Set templates"}),
      :multiline? true,
      :input-style {:font-family ui/font-code, :min-height 240, :font-size 12},
-     :initial (write-edn template),
-     :text "Paste template markup"}
+     :initial (write-edn templates),
+     :text "Paste templates"}
     (fn [result d! m!]
       (try
-       (let [template (read-string result)] (d! :template template))
+       (let [templates (read-string result)] (d! :templates templates))
        (catch js/Error. error (js/console.error error) (js/alert "Failed to add template"))))))
+  (div
+   {}
+   (cursor->
+    :pointer
+    comp-prompt
+    states
+    {:trigger (if (some? pointer) (<> pointer) (<> "nothing" {:color (hsl 0 0 80)})),
+     :text "Template name:",
+     :initial pointer}
+    (fn [result d! m!] (if (some? result) (d! :pointer result)))))
   (div
    {}
    (<> "Shadows:")

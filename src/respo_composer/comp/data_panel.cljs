@@ -9,7 +9,7 @@
             [respo-md.comp.md :refer [comp-md]]
             [respo-composer.config :refer [dev?]]
             [inflow-popup.comp.popup :refer [comp-popup]]
-            [respo-alerts.comp.alerts :refer [comp-prompt]]
+            [respo-alerts.comp.alerts :refer [comp-prompt comp-select]]
             [cljs.reader :refer [read-string]]
             [favored-edn.core :refer [write-edn]]))
 
@@ -54,11 +54,11 @@
    {}
    (cursor->
     :pointer
-    comp-prompt
+    comp-select
     states
-    {:trigger (if (some? pointer) (<> pointer) (<> "nothing" {:color (hsl 0 0 80)})),
-     :text "Template name:",
-     :initial pointer}
+    (or pointer "nothing")
+    (->> templates keys (map (fn [x] {:value x, :display x})))
+    {:text "Template name:"}
     (fn [result d! m!] (if (some? result) (d! :pointer result)))))
   (div
    {}

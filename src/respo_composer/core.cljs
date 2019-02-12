@@ -12,18 +12,15 @@
 
 (declare render-markup)
 
-(defn str-keys [x] (->> x (map (fn [[k v]] [(name k) v])) (into {})))
-
 (defn get-layout [layout]
-  (str-keys
-   (case layout
-     :row ui/row
-     :row-center ui/row-center
-     :row-middle ui/row-middle
-     :row-parted ui/row-parted
-     :column ui/column
-     :column-parted ui/column-parted
-     {})))
+  (case layout
+    :row ui/row
+    :row-center ui/row-center
+    :row-middle ui/row-middle
+    :row-parted ui/row-parted
+    :column ui/column
+    :column-parted ui/column-parted
+    {}))
 
 (defn render-button [markup]
   (let [props (:props markup)]
@@ -81,3 +78,5 @@
   (list->
    (merge (:attrs markup) {:style (merge (get-layout (:layout markup)) (:style markup))})
    (render-children (:children markup) context)))
+
+(defn str-keys [x] (->> x (map (fn [[k v]] [(name k) v])) (into {})))

@@ -1,7 +1,7 @@
 {
-  "name": "calcit-workflow",
+  "name": "composer-app",
   "version": "0.1.0",
-  "description": "ClojureScript workflow using Calcit Editor",
+  "description": "Composer app creator for Respo",
   "main": "index.js",
   "scripts": {
     "watch": "shadow-cljs watch client",
@@ -21,7 +21,7 @@
   "license": "MIT",
   "devDependencies": {
     "http-server": "^0.11.1",
-    "shadow-cljs": "^2.7.30"
+    "shadow-cljs": "^2.7.32"
   },
   "dependencies": {
     "feather-icons": "^4.17.0",

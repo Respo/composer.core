@@ -4,7 +4,8 @@
             [respo.comp.space :refer [=<]]
             [hsl.core :refer [hsl]]
             [feather.core :refer [comp-icon]]
-            [respo-ui.core :as ui]))
+            [respo-ui.core :as ui]
+            [clojure.string :as string]))
 
 (declare render-children)
 
@@ -21,6 +22,22 @@
     :column ui/column
     :column-parted ui/column-parted
     {}))
+
+(defn parse-token [x]
+  (cond
+    (string/starts-with? x ":") (keyword (subs x 1))
+    (string/starts-with? x "|") (subs x 1)
+    :else (do (js/console.error "Failed to parse token:" x) nil)))
+
+(defn read-by-marks [xs scope]
+  (if (nil? scope)
+    nil
+    (if (empty? xs)
+      scope
+      (let [x (first xs), v (parse-token x)] (recur (rest xs) (get scope v))))))
+
+(defn read-token [x scope]
+  (if (string/starts-with? x "@") (read-by-marks (string/split (subs x 1) " ") scope) x))
 
 (defn render-button [markup on-action]
   (let [props (:props markup)]
@@ -57,8 +74,9 @@
 
 (defn render-template [markup context] (<> "TODO: template"))
 
-(defn render-text [markup]
-  (let [props (:props markup)] (<> (get props "value") (:style markup))))
+(defn render-text [markup context]
+  (let [props (:props markup), value (read-token (get props "value") (:data context))]
+    (<> value (:style markup))))
 
 (def style-unknown {"font-size" 12, "color" :red})
 
@@ -69,7 +87,7 @@
     :button (render-button markup on-action)
     :icon (render-icon markup on-action)
     :link (render-link markup)
-    :text (render-text markup)
+    :text (render-text markup context)
     :some (render-some markup context)
     :template (render-template markup context)
     :input (render-input markup context)

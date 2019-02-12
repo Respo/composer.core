@@ -32,6 +32,19 @@ Node type | `props`
 `list` | `value`
 `input` |  `action`, `value`, `multi-lines`
 
+For string values,
+
+* ones that start with `@` will be read as values
+* `:x` would be read as a keyword `:x`
+* `|x` would be read as a string `"x"`
+
+for example,
+
+* `a`, means "a"
+* `@:a`, means `(get-in data [:a])`
+* `@|a`, means `(get-in data ["a"])`
+* `@:a :b |c`, means `(get-in data [:a :b "c"])`
+
 ### Workflow
 
 Workflow https://github.com/mvc-works/calcit-workflow

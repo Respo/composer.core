@@ -39,13 +39,15 @@
      (merge {:font-size size, :color color} (:style markup))
      (fn [e d! m!] (on-action (or (get props "action") "icon-click") props)))))
 
-(defn render-if [markup context] (<> "TODO: if"))
-
 (defn render-input [markup context] (<> "TODO: input"))
 
 (defn render-link [markup]
   (let [props (:props markup)]
     (a {:style (merge ui/link (:style markup)), :inner-text (get props "text" "Submit")})))
+
+(defn render-list [markup context] (<> "TODO: list"))
+
+(defn render-some [markup context] (<> "TODO: some"))
 
 (defn use-number [x] (if (nil? x) nil (js/parseFloat x)))
 
@@ -58,22 +60,20 @@
 (defn render-text [markup]
   (let [props (:props markup)] (<> (get props "value") (:style markup))))
 
-(defn render-value [markup context] (<> "TODO: value"))
-
 (def style-unknown {"font-size" 12, "color" :red})
 
 (defn render-markup [markup context on-action]
   (case (:type markup)
     :box (render-box markup context on-action)
     :space (render-space markup)
+    :button (render-button markup on-action)
     :icon (render-icon markup on-action)
+    :link (render-link markup)
     :text (render-text markup)
+    :some (render-some markup context)
     :template (render-template markup context)
     :input (render-input markup context)
-    :button (render-button markup on-action)
-    :link (render-link markup)
-    :if (render-if markup context)
-    :value (render-value markup context)
+    :list (render-list markup context)
     (div {:style style-unknown} (<> (str "Unknown type:" (:type markup))))))
 
 (defn render-children [children context on-action]

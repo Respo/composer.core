@@ -13,7 +13,7 @@
 (defcomp
  comp-previewer
  (template mock-data shadows? templates)
- (let [context {:data mock-data, :templates templates}]
+ (let [context {:data mock-data, :templates templates, :level 1}]
    (div
     {:style (merge ui/flex ui/center {:background-color (hsl 0 0 90)}),
      :class-name (if shadows? "use-shadows" nil)}

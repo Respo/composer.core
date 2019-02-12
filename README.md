@@ -13,8 +13,24 @@ Composer Renderer
 ```clojure
 (respo-composer.core/render-markup markup
   {:data {}
+   :level 1
    :templates {"container" nil}})
 ```
+
+### Specs
+
+Node type | `props`
+--- | ---
+`box` | -
+`space` | `width`, `height`
+`text` | `value`
+`some` | `value`
+`button` | `action`, `text`
+`link` | `action`, `text`, `href`
+`icon` | `action`, `name`
+`template` | `name`
+`list` | `value`
+`input` |  `action`, `value`, `multi-lines`
 
 ### Workflow
 

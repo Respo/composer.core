@@ -28,7 +28,7 @@ Node type | `props`
 `button` | `action`, `text`
 `link` | `action`, `text`, `href`
 `icon` | `action`, `name`
-`template` | `name`
+`template` | `name`, `data`
 `list` | `value`
 `input` |  `action`, `value`, `multi-lines`
 

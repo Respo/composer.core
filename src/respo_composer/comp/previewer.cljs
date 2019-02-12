@@ -17,4 +17,7 @@
    (div
     {:style (merge ui/flex ui/center {:background-color (hsl 0 0 90)}),
      :class-name (if shadows? "use-shadows" nil)}
-    (render-markup template context))))
+    (render-markup
+     template
+     context
+     (fn [op op-data] (println "action in markup:" op op-data))))))

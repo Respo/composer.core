@@ -92,7 +92,7 @@
   (let [templates (:templates context), data (:data context), props (:props markup)]
     (render-markup
      (get templates (get props "name"))
-     (assoc context :data (read-token (get props "data") data))
+     (-> context (assoc :data (read-token (get props "data") data)) (update :level inc))
      on-action)))
 
 (defn render-markup [markup context on-action]

@@ -1820,6 +1820,13 @@
            "j" {:type :leaf, :by "rJG4IHzWf", :at 1549726335498, :text "ui/row-center", :id "m3-XfGKeGM"}
           }
          }
+         "o" {
+          :type :expr, :by "rJG4IHzWf", :at 1549726296784, :id "LETIio2AC"
+          :data {
+           "T" {:type :leaf, :by "rJG4IHzWf", :at 1550159281977, :text ":center", :id "WEosPjQ1O5"}
+           "j" {:type :leaf, :by "rJG4IHzWf", :at 1550159283706, :text "ui/center", :id "m3-XfGKeGM"}
+          }
+         }
          "p" {
           :type :expr, :by "rJG4IHzWf", :at 1549726296784, :id "uWyKW96pAs"
           :data {

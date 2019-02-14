@@ -19,6 +19,7 @@
   (case layout
     :row ui/row
     :row-center ui/row-center
+    :center ui/center
     :row-middle ui/row-middle
     :row-parted ui/row-parted
     :column ui/column

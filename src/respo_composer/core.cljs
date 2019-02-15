@@ -1,9 +1,9 @@
 
 (ns respo-composer.core
-  (:require [respo.core :refer [defcomp cursor-> list-> <> div button textarea span a]]
+  (:require [respo.core :refer [defcomp cursor-> list-> <> div button textarea span a i]]
             [respo.comp.space :refer [=<]]
             [hsl.core :refer [hsl]]
-            [feather.core :refer [comp-icon]]
+            ["feather-icons" :as icons]
             [respo-ui.core :as ui]
             [clojure.string :as string]))
 
@@ -53,13 +53,17 @@
 
 (defn render-icon [markup on-action]
   (let [props (:props markup)
-        icon-name (get props "name")
-        size (get props "size" 16)
-        color (get props "color" (hsl 200 80 70))]
-    (comp-icon
-     icon-name
-     (merge {:font-size size, :color color} (:style markup))
-     (fn [e d! m!] (on-action (or (get props "action") "icon-click") props)))))
+        icon-name (get props "name" "feather")
+        size (js/parseFloat (get props "size" "16"))
+        color (get props "color" (hsl 200 80 70))
+        obj (aget (.-icons icons) icon-name)]
+    (if (some? obj)
+      (i
+       {:style {:display :inline-block},
+        :innerHTML (.toSvg obj (clj->js {:width size, :height size, :color color}))})
+      (<>
+       (str "No icon: " icon-name)
+       {:color :white, :background-color :red, :font-size 12}))))
 
 (defn render-input [markup context] (<> "TODO: input"))
 

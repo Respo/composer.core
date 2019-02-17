@@ -28,6 +28,16 @@
     :column-parted ui/column-parted
     {}))
 
+(defn get-preset [preset]
+  (case preset
+    :flex ui/flex
+    :font-code {:font-family ui/font-code}
+    :font-fancy {:font-family ui/font-fancy}
+    :font-normal {:font-family ui/font-normal}
+    :fullscreen {:font-family ui/fullscreen}
+    :scroll {:overflow :auto}
+    (do (js/console.warning (str "Unknown preset: " preset)) nil)))
+
 (defn parse-token [x]
   (cond
     (string/starts-with? x ":") (keyword (subs x 1))
@@ -49,10 +59,14 @@
       :else x)
     nil))
 
+(defn style-presets [presets]
+  (println "presets" presets)
+  (->> presets (map get-preset) (apply merge)))
+
 (defn render-button [markup context on-action]
   (let [props (:props markup), text (read-token (get props "text") (:data context))]
     (button
-     {:style (merge ui/button (:style markup)),
+     {:style (merge ui/button (style-presets (:presets markup)) (:style markup)),
       :inner-text (or text "Submit"),
       :on-click (fn [e d! m!] (on-action (or (get props "action") "button-click") props))})))
 
@@ -85,7 +99,7 @@
 (defn render-list [markup context] (<> "TODO: list"))
 
 (defn render-slot [markup context on-action]
-  (let [props (:props markup), dom (:dom props)]
+  (let [props (:props markup), dom (or (get props "dom") (:dom props))]
     (cond
       (component? dom) dom
       (element? dom) dom
@@ -102,7 +116,7 @@
 
 (defn render-text [markup context]
   (let [props (:props markup), value (read-token (get props "value") (:data context))]
-    (<> value (:style markup))))
+    (<> value (merge (style-presets (:presets markup)) (:style markup)))))
 
 (def style-unknown {"font-size" 12, "color" :red})
 
@@ -135,7 +149,10 @@
 
 (defn render-box [markup context on-action]
   (list->
-   (merge (:attrs markup) {:style (merge (get-layout (:layout markup)) (:style markup))})
+   (merge
+    (:attrs markup)
+    {:style (merge
+             (get-layout (:layout markup))
+             (style-presets (:presets markup))
+             (:style markup))})
    (render-children (:children markup) context on-action)))
-
-(defn str-keys [x] (->> x (map (fn [[k v]] [(name k) v])) (into {})))

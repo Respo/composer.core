@@ -5,7 +5,9 @@
             [hsl.core :refer [hsl]]
             ["feather-icons" :as icons]
             [respo-ui.core :as ui]
-            [clojure.string :as string]))
+            [clojure.string :as string]
+            [cljs.reader :refer [read-string]]
+            [respo.util.detect :refer [component? element?]]))
 
 (declare render-children)
 
@@ -41,7 +43,10 @@
 
 (defn read-token [x scope]
   (if (string? x)
-    (if (string/starts-with? x "@") (read-by-marks (string/split (subs x 1) " ") scope) x)
+    (cond
+      (string/starts-with? x "@") (read-by-marks (string/split (subs x 1) " ") scope)
+      (string/starts-with? x "~") (read-string (subs x 1))
+      :else x)
     nil))
 
 (defn render-button [markup context on-action]
@@ -79,6 +84,14 @@
 
 (defn render-list [markup context] (<> "TODO: list"))
 
+(defn render-slot [markup context on-action]
+  (let [props (:props markup), dom (:dom props)]
+    (cond
+      (component? dom) dom
+      (element? dom) dom
+      (some? dom) (<> (str "<Bad slot: " (pr-str dom) ">"))
+      :else (<> "<Empty slot>"))))
+
 (defn render-some [markup context] (<> "TODO: some"))
 
 (defn use-number [x] (if (nil? x) nil (js/parseFloat x)))
@@ -112,6 +125,7 @@
     :template (render-template markup context on-action)
     :input (render-input markup context)
     :list (render-list markup context)
+    :slot (render-slot markup context on-action)
     (div {:style style-unknown} (<> (str "Unknown type:" (:type markup))))))
 
 (defn render-children [children context on-action]

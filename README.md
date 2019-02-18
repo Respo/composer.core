@@ -31,6 +31,7 @@ Node type | `props`
 `template` | `name`, `data`
 `list` | `value`
 `input` |  `action`, `value`, `multi-lines`
+`slot` | `dom`
 
 For string values,
 

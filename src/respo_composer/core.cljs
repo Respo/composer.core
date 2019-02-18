@@ -9,6 +9,8 @@
             [cljs.reader :refer [read-string]]
             [respo.util.detect :refer [component? element?]]))
 
+(declare render-some)
+
 (declare render-children)
 
 (declare render-box)
@@ -59,9 +61,7 @@
       :else x)
     nil))
 
-(defn style-presets [presets]
-  (println "presets" presets)
-  (->> presets (map get-preset) (apply merge)))
+(defn style-presets [presets] (->> presets (map get-preset) (apply merge)))
 
 (defn render-button [markup context on-action]
   (let [props (:props markup), text (read-token (get props "text") (:data context))]
@@ -106,8 +106,6 @@
       (some? dom) (<> (str "<Bad slot: " (pr-str dom) ">"))
       :else (<> "<Empty slot>"))))
 
-(defn render-some [markup context] (<> "TODO: some"))
-
 (defn use-number [x] (if (nil? x) nil (js/parseFloat x)))
 
 (defn render-space [markup]
@@ -127,6 +125,18 @@
      (-> context (assoc :data (read-token (get props "data") data)) (update :level inc))
      on-action)))
 
+(defn render-some [markup context on-action]
+  (let [props (:props markup)
+        value (read-token (get props "value") (:data context))
+        child-pair (->> (:children markup) (sort-by first) (vals))]
+    (if (not= (count child-pair) 2)
+      (do
+       (js/console.warn "<Some> requires 2 children, but got" (count child-pair))
+       (<> "<Bad some>"))
+      (if (nil? value)
+        (render-markup (first child-pair) context on-action)
+        (render-markup (last child-pair) context on-action)))))
+
 (defn render-markup [markup context on-action]
   (case (:type markup)
     :box (render-box markup context on-action)
@@ -135,7 +145,7 @@
     :icon (render-icon markup on-action)
     :link (render-link markup context on-action)
     :text (render-text markup context)
-    :some (render-some markup context)
+    :some (render-some markup context on-action)
     :template (render-template markup context on-action)
     :input (render-input markup context)
     :list (render-list markup context)

@@ -22,27 +22,6 @@
 
 (declare render-markup)
 
-(defn get-layout [layout]
-  (case layout
-    :row ui/row
-    :row-center ui/row-center
-    :center ui/center
-    :row-middle ui/row-middle
-    :row-parted ui/row-parted
-    :column ui/column
-    :column-parted ui/column-parted
-    {}))
-
-(defn get-preset [preset]
-  (case preset
-    :flex ui/flex
-    :font-code {:font-family ui/font-code}
-    :font-fancy {:font-family ui/font-fancy}
-    :font-normal {:font-family ui/font-normal}
-    :fullscreen {:font-family ui/fullscreen}
-    :scroll {:overflow :auto}
-    (do (js/console.warning (str "Unknown preset: " preset)) nil)))
-
 (defn parse-token [x]
   (cond
     (string/starts-with? x ":") (keyword (subs x 1))
@@ -64,14 +43,40 @@
       :else x)
     nil))
 
+(defn eval-attrs [attrs data]
+  (->> attrs (map (fn [[k v]] [k (read-token v data)])) (into {})))
+
+(defn get-layout [layout]
+  (case layout
+    :row ui/row
+    :row-center ui/row-center
+    :center ui/center
+    :row-middle ui/row-middle
+    :row-parted ui/row-parted
+    :column ui/column
+    :column-parted ui/column-parted
+    {}))
+
+(defn get-preset [preset]
+  (case preset
+    :flex ui/flex
+    :font-code {:font-family ui/font-code}
+    :font-fancy {:font-family ui/font-fancy}
+    :font-normal {:font-family ui/font-normal}
+    :fullscreen {:font-family ui/fullscreen}
+    :scroll {:overflow :auto}
+    (do (js/console.warning (str "Unknown preset: " preset)) nil)))
+
 (defn style-presets [presets] (->> presets (map get-preset) (apply merge)))
 
 (defn render-button [markup context on-action]
   (let [props (:props markup), text (read-token (get props "text") (:data context))]
     (button
-     {:style (merge ui/button (style-presets (:presets markup)) (:style markup)),
-      :inner-text (or text "Submit"),
-      :on-click (fn [e d! m!] (on-action (or (get props "action") "button-click") props))})))
+     (merge
+      (eval-attrs (:attrs markup) (:data context))
+      {:style (merge ui/button (style-presets (:presets markup)) (:style markup)),
+       :inner-text (or text "Submit"),
+       :on-click (fn [e d! m!] (on-action (or (get props "action") "button-click") props))}))))
 
 (defn render-icon [markup on-action]
   (let [props (:props markup)
@@ -94,10 +99,12 @@
         text (read-token (get props "text") (:data context))
         href (read-token (get props "href") (:data context))]
     (a
-     {:style (merge ui/link (:style markup)),
-      :inner-text (or text "Submit"),
-      :href (or href "#"),
-      :on-click (fn [e d! m!] (on-action (get props "action" "link-click") props))})))
+     (merge
+      (eval-attrs (:attrs markup) (:data context))
+      {:style (merge ui/link (:style markup)),
+       :inner-text (or text "Submit"),
+       :href (or href "#"),
+       :on-click (fn [e d! m!] (on-action (get props "action" "link-click") props))}))))
 
 (defn render-slot [markup context on-action]
   (let [props (:props markup), dom (or (get props "dom") (:dom props))]
@@ -164,7 +171,7 @@
       :else
         (list->
          (merge
-          (:attrs markup)
+          (eval-attrs (:attrs markup) (:data context))
           {:style (merge
                    (get-layout (:layout markup))
                    (style-presets (:presets markup))
@@ -187,7 +194,7 @@
 (defn render-box [markup context on-action]
   (list->
    (merge
-    (:attrs markup)
+    (eval-attrs (:attrs markup) (:data context))
     {:style (merge
              (get-layout (:layout markup))
              (style-presets (:presets markup))

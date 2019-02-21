@@ -7,7 +7,8 @@
             [respo-ui.core :as ui]
             [clojure.string :as string]
             [cljs.reader :refer [read-string]]
-            [respo.util.detect :refer [component? element?]]))
+            [respo.util.detect :refer [component? element?]])
+  (:require-macros [clojure.core.strint :refer [<<]]))
 
 (declare render-some)
 
@@ -16,6 +17,8 @@
 (declare render-box)
 
 (declare render-template)
+
+(declare render-list)
 
 (declare render-markup)
 
@@ -84,7 +87,7 @@
        (str "No icon: " icon-name)
        {:color :white, :background-color :red, :font-size 12}))))
 
-(defn render-input [markup context] (<> "TODO: input"))
+(defn render-input [markup context on-action] (<> "TODO: input"))
 
 (defn render-link [markup context on-action]
   (let [props (:props markup)
@@ -95,8 +98,6 @@
       :inner-text (or text "Submit"),
       :href (or href "#"),
       :on-click (fn [e d! m!] (on-action (get props "action" "link-click") props))})))
-
-(defn render-list [markup context] (<> "TODO: list"))
 
 (defn render-slot [markup context on-action]
   (let [props (:props markup), dom (or (get props "dom") (:dom props))]
@@ -147,10 +148,36 @@
     :text (render-text markup context)
     :some (render-some markup context on-action)
     :template (render-template markup context on-action)
-    :input (render-input markup context)
-    :list (render-list markup context)
+    :input (render-input markup context on-action)
+    :list (render-list markup context on-action)
     :slot (render-slot markup context on-action)
     (div {:style style-unknown} (<> (str "Unknown type:" (:type markup))))))
+
+(defn render-list [markup context on-action]
+  (let [props (:props markup)
+        value (read-token (get props "value") (:data context))
+        only-child (first (vals (:children markup)))]
+    (cond
+      (not (sequential? value)) (<> (<< "<Bad list: ~(pr-str value)>"))
+      (> (count (:children markup)) 1) (<> "<Bad list: too many children>")
+      (nil? only-child) (<> (<< "<Bad list: no children>"))
+      :else
+        (list->
+         (merge
+          (:attrs markup)
+          {:style (merge
+                   (get-layout (:layout markup))
+                   (style-presets (:presets markup))
+                   (:style markup))})
+         (->> value
+              (map-indexed
+               (fn [idx x]
+                 [idx
+                  (let [new-context (assoc
+                                     context
+                                     :data
+                                     {:index idx, :outer (:data context), :item x})]
+                    (render-markup only-child new-context on-action))])))))))
 
 (defn render-children [children context on-action]
   (->> children

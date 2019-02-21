@@ -32,6 +32,7 @@ Node type | `props`
 `list` | `value`
 `input` |  `action`, `value`, `multi-lines`
 `slot` | `dom`
+`case` | `value`(?)
 
 For string values,
 
@@ -45,6 +46,12 @@ for example,
 * `@:a`, means `(get-in data [:a])`
 * `@|a`, means `(get-in data ["a"])`
 * `@:a :b |c`, means `(get-in data [:a :b "c"])`
+
+data inside list children
+
+* `index`
+* `item`, list item
+* `outer`, data of outer context
 
 ### Workflow
 

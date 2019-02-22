@@ -12,6 +12,8 @@
 
 (declare render-some)
 
+(declare render-popup)
+
 (declare render-children)
 
 (declare render-box)
@@ -145,6 +147,36 @@
         (render-markup (first child-pair) context on-action)
         (render-markup (last child-pair) context on-action)))))
 
+(defn render-popup [markup context on-action]
+  (let [props (:props markup), value (read-token (get props "visible") (:data context))]
+    (if value
+      (div
+       {:style {:position :fixed,
+                :top 0,
+                :left 0,
+                :width "100%",
+                :height "100%",
+                :display :flex,
+                :overflow :auto,
+                :padding 32,
+                :background-color (hsl 0 0 0 0.7)},
+        :on-click (fn [e d! m!]
+          (on-action (or (get props "action") "backdrop-click") props))}
+       (list->
+        (merge
+         {:on-click (fn [e d! m!] )}
+         (eval-attrs (:attrs markup) (:data context))
+         {:style (merge
+                  {:margin :auto,
+                   :min-width 320,
+                   :min-height 200,
+                   :background-color (hsl 0 0 100)}
+                  (get-layout (:layout markup))
+                  (style-presets (:presets markup))
+                  (:style markup))})
+        (render-children (:children markup) context on-action)))
+      (span {}))))
+
 (defn render-markup [markup context on-action]
   (case (:type markup)
     :box (render-box markup context on-action)
@@ -158,6 +190,7 @@
     :input (render-input markup context on-action)
     :list (render-list markup context on-action)
     :slot (render-slot markup context on-action)
+    :popup (render-popup markup context on-action)
     (div {:style style-unknown} (<> (str "Unknown type:" (:type markup))))))
 
 (defn render-list [markup context on-action]

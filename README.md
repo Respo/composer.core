@@ -32,6 +32,8 @@ Node type | `props`
 `list` | `value`
 `input` |  `action`, `value`, `multi-lines`
 `slot` | `dom`
+`inspect` | `title`
+`popup` | `visible`
 `case` | `value`(?)
 
 For string values,

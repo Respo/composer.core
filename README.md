@@ -30,7 +30,7 @@ Node type | `props`
 `icon` | `action`, `name`
 `template` | `name`, `data`
 `list` | `value`
-`input` |  `action`, `value`, `multi-lines`
+`input` |  `action`, `value`, `textarea`
 `slot` | `dom`
 `inspect` | `title`
 `popup` | `visible`

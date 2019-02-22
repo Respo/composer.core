@@ -1,6 +1,8 @@
 
 (ns respo-composer.core
-  (:require [respo.core :refer [defcomp cursor-> list-> <> div button textarea span a i]]
+  (:require [respo.core
+             :refer
+             [defcomp cursor-> list-> <> div button textarea span a i input]]
             [respo.comp.space :refer [=<]]
             [hsl.core :refer [hsl]]
             ["feather-icons" :as icons]
@@ -94,7 +96,21 @@
        (str "No icon: " icon-name)
        {:color :white, :background-color :red, :font-size 12}))))
 
-(defn render-input [markup context on-action] (<> "TODO: input"))
+(defn render-input [markup context on-action]
+  (let [props (:props markup)
+        value (read-token (get props "value") (:data context))
+        textarea? (some? (get props "textarea"))
+        action (or (get props "action") "button-click")
+        listener (fn [e d! m!] (on-action action props e))]
+    (if textarea?
+      (textarea
+       {:value value,
+        :style (merge ui/textarea (style-presets (:presets markup)) (:style markup)),
+        :on-input listener})
+      (input
+       {:value value,
+        :style (merge ui/input (style-presets (:presets markup)) (:style markup)),
+        :on-input listener}))))
 
 (defn render-inspect [markup context]
   (let [props (:props markup), value (read-token (get props "title") (:data context))]

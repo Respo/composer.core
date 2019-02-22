@@ -96,6 +96,20 @@
 
 (defn render-input [markup context on-action] (<> "TODO: input"))
 
+(defn render-inspect [markup context]
+  (let [props (:props markup), value (read-token (get props "title") (:data context))]
+    (span
+     {:inner-text (str value),
+      :style {:background-color (hsl 200 80 60),
+              :color :white,
+              :padding "0 8px",
+              :font-size 12,
+              :font-family ui/font-fancy,
+              :line-height "20px",
+              :height "20px",
+              :display :inline-block},
+      :on-click (fn [e d! m!] (js/console.log (clj->js (:data context))))})))
+
 (defn render-link [markup context on-action]
   (let [props (:props markup)
         text (read-token (get props "text") (:data context))
@@ -191,6 +205,7 @@
     :list (render-list markup context on-action)
     :slot (render-slot markup context on-action)
     :popup (render-popup markup context on-action)
+    :inspect (render-inspect markup context)
     (div {:style style-unknown} (<> (str "Unknown type:" (:type markup))))))
 
 (defn render-list [markup context on-action]

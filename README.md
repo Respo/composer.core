@@ -35,6 +35,7 @@ Node type | `props`
 `inspect` | `title`
 `popup` | `visible`
 `case` | `value`(?)
+`element` | 'name'
 
 For string values,
 

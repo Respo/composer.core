@@ -2,7 +2,18 @@
 (ns respo-composer.core
   (:require [respo.core
              :refer
-             [defcomp cursor-> list-> <> div button textarea span a i input]]
+             [defcomp
+              cursor->
+              list->
+              <>
+              div
+              button
+              textarea
+              span
+              a
+              i
+              input
+              create-list-element]]
             [respo.comp.space :refer [=<]]
             [hsl.core :refer [hsl]]
             ["feather-icons" :as icons]
@@ -19,6 +30,8 @@
 (declare render-children)
 
 (declare render-box)
+
+(declare render-element)
 
 (declare render-template)
 
@@ -222,6 +235,7 @@
     :slot (render-slot markup context on-action)
     :popup (render-popup markup context on-action)
     :inspect (render-inspect markup context)
+    :element (render-element markup context)
     (div {:style style-unknown} (<> (str "Unknown type:" (:type markup))))))
 
 (defn render-list [markup context on-action]
@@ -249,6 +263,20 @@
                                      :data
                                      {:index idx, :outer (:data context), :item x})]
                     (render-markup only-child new-context on-action))])))))))
+
+(defn render-element [markup context on-action]
+  (let [props (:props markup)
+        value (read-token (get props "name") (:data context))
+        tag-name (keyword (or value "div"))]
+    (create-list-element
+     tag-name
+     (merge
+      (eval-attrs (:attrs markup) (:data context))
+      {:style (merge
+               (get-layout (:layout markup))
+               (style-presets (:presets markup))
+               (:style markup))})
+     (render-children (:children markup) context on-action))))
 
 (defn render-children [children context on-action]
   (->> children

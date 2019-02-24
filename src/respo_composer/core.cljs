@@ -1,6 +1,19 @@
 
 (ns respo-composer.core
-  (:require [respo.core :refer [defcomp cursor-> list-> <> div button textarea span a i]]
+  (:require [respo.core
+             :refer
+             [defcomp
+              cursor->
+              list->
+              <>
+              div
+              button
+              textarea
+              span
+              a
+              i
+              input
+              create-list-element]]
             [respo.comp.space :refer [=<]]
             [hsl.core :refer [hsl]]
             ["feather-icons" :as icons]
@@ -12,9 +25,13 @@
 
 (declare render-some)
 
+(declare render-popup)
+
 (declare render-children)
 
 (declare render-box)
+
+(declare render-element)
 
 (declare render-template)
 
@@ -92,7 +109,35 @@
        (str "No icon: " icon-name)
        {:color :white, :background-color :red, :font-size 12}))))
 
-(defn render-input [markup context on-action] (<> "TODO: input"))
+(defn render-input [markup context on-action]
+  (let [props (:props markup)
+        value (read-token (get props "value") (:data context))
+        textarea? (some? (get props "textarea"))
+        action (or (get props "action") "button-click")
+        listener (fn [e d! m!] (on-action action props e))]
+    (if textarea?
+      (textarea
+       {:value value,
+        :style (merge ui/textarea (style-presets (:presets markup)) (:style markup)),
+        :on-input listener})
+      (input
+       {:value value,
+        :style (merge ui/input (style-presets (:presets markup)) (:style markup)),
+        :on-input listener}))))
+
+(defn render-inspect [markup context]
+  (let [props (:props markup), value (read-token (get props "title") (:data context))]
+    (span
+     {:inner-text (str value),
+      :style {:background-color (hsl 200 80 60),
+              :color :white,
+              :padding "0 8px",
+              :font-size 12,
+              :font-family ui/font-fancy,
+              :line-height "20px",
+              :height "20px",
+              :display :inline-block},
+      :on-click (fn [e d! m!] (js/console.log (clj->js (:data context))))})))
 
 (defn render-link [markup context on-action]
   (let [props (:props markup)
@@ -145,6 +190,36 @@
         (render-markup (first child-pair) context on-action)
         (render-markup (last child-pair) context on-action)))))
 
+(defn render-popup [markup context on-action]
+  (let [props (:props markup), value (read-token (get props "visible") (:data context))]
+    (if value
+      (div
+       {:style {:position :fixed,
+                :top 0,
+                :left 0,
+                :width "100%",
+                :height "100%",
+                :display :flex,
+                :overflow :auto,
+                :padding 32,
+                :background-color (hsl 0 0 0 0.7)},
+        :on-click (fn [e d! m!]
+          (on-action (or (get props "action") "backdrop-click") props))}
+       (list->
+        (merge
+         {:on-click (fn [e d! m!] )}
+         (eval-attrs (:attrs markup) (:data context))
+         {:style (merge
+                  {:margin :auto,
+                   :min-width 320,
+                   :min-height 200,
+                   :background-color (hsl 0 0 100)}
+                  (get-layout (:layout markup))
+                  (style-presets (:presets markup))
+                  (:style markup))})
+        (render-children (:children markup) context on-action)))
+      (span {}))))
+
 (defn render-markup [markup context on-action]
   (case (:type markup)
     :box (render-box markup context on-action)
@@ -158,6 +233,9 @@
     :input (render-input markup context on-action)
     :list (render-list markup context on-action)
     :slot (render-slot markup context on-action)
+    :popup (render-popup markup context on-action)
+    :inspect (render-inspect markup context)
+    :element (render-element markup context)
     (div {:style style-unknown} (<> (str "Unknown type:" (:type markup))))))
 
 (defn render-list [markup context on-action]
@@ -185,6 +263,20 @@
                                      :data
                                      {:index idx, :outer (:data context), :item x})]
                     (render-markup only-child new-context on-action))])))))))
+
+(defn render-element [markup context on-action]
+  (let [props (:props markup)
+        value (read-token (get props "name") (:data context))
+        tag-name (keyword (or value "div"))]
+    (create-list-element
+     tag-name
+     (merge
+      (eval-attrs (:attrs markup) (:data context))
+      {:style (merge
+               (get-layout (:layout markup))
+               (style-presets (:presets markup))
+               (:style markup))})
+     (render-children (:children markup) context on-action))))
 
 (defn render-children [children context on-action]
   (->> children

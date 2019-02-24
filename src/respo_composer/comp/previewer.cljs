@@ -20,4 +20,4 @@
     (render-markup
      template
      context
-     (fn [op op-data] (println "action in markup:" op op-data))))))
+     (fn [op props op-data] (println "action in markup:" op props op-data))))))

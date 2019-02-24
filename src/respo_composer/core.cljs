@@ -87,24 +87,28 @@
 (defn style-presets [presets] (->> presets (map get-preset) (apply merge)))
 
 (defn render-button [markup context on-action]
-  (let [props (:props markup), text (read-token (get props "text") (:data context))]
+  (let [props (:props markup)
+        text (read-token (get props "text") (:data context))
+        action (get props "action" "button-click")]
     (button
      (merge
       (eval-attrs (:attrs markup) (:data context))
       {:style (merge ui/button (style-presets (:presets markup)) (:style markup)),
        :inner-text (or text "Submit"),
-       :on-click (fn [e d! m!] (on-action (or (get props "action") "button-click") props))}))))
+       :on-click (fn [e d! m!] (on-action d! action props nil))}))))
 
 (defn render-icon [markup on-action]
   (let [props (:props markup)
         icon-name (get props "name" "feather")
         size (js/parseFloat (get props "size" "16"))
         color (get props "color" (hsl 200 80 70))
-        obj (aget (.-icons icons) icon-name)]
+        obj (aget (.-icons icons) icon-name)
+        action (or (get props "action") "icon-click")]
     (if (some? obj)
       (i
        {:style {:display :inline-block},
-        :innerHTML (.toSvg obj (clj->js {:width size, :height size, :color color}))})
+        :innerHTML (.toSvg obj (clj->js {:width size, :height size, :color color})),
+        :on-click (fn [e d! m!] (on-action d! action props nil))})
       (<>
        (str "No icon: " icon-name)
        {:color :white, :background-color :red, :font-size 12}))))
@@ -113,8 +117,8 @@
   (let [props (:props markup)
         value (read-token (get props "value") (:data context))
         textarea? (some? (get props "textarea"))
-        action (or (get props "action") "button-click")
-        listener (fn [e d! m!] (on-action action props e))]
+        action (get props "action" "input")
+        listener (fn [e d! m!] (on-action d! action props e))]
     (if textarea?
       (textarea
        {:value value,
@@ -142,14 +146,15 @@
 (defn render-link [markup context on-action]
   (let [props (:props markup)
         text (read-token (get props "text") (:data context))
-        href (read-token (get props "href") (:data context))]
+        href (read-token (get props "href") (:data context))
+        action (get props "action" "link-click")]
     (a
      (merge
       (eval-attrs (:attrs markup) (:data context))
       {:style (merge ui/link (:style markup)),
        :inner-text (or text "Submit"),
        :href (or href "#"),
-       :on-click (fn [e d! m!] (on-action (get props "action" "link-click") props))}))))
+       :on-click (fn [e d! m!] (on-action d! action props nil))}))))
 
 (defn render-slot [markup context on-action]
   (let [props (:props markup), dom (or (get props "dom") (:dom props))]
@@ -173,10 +178,12 @@
 
 (defn render-template [markup context on-action]
   (let [templates (:templates context), data (:data context), props (:props markup)]
-    (render-markup
-     (get templates (get props "name"))
-     (-> context (assoc :data (read-token (get props "data") data)) (update :level inc))
-     on-action)))
+    (if (> (:level context) 10)
+      (<> "<Bad template: too much levels>")
+      (render-markup
+       (get templates (get props "name"))
+       (-> context (assoc :data (read-token (get props "data") data)) (update :level inc))
+       on-action))))
 
 (defn render-some [markup context on-action]
   (let [props (:props markup)
@@ -191,7 +198,9 @@
         (render-markup (last child-pair) context on-action)))))
 
 (defn render-popup [markup context on-action]
-  (let [props (:props markup), value (read-token (get props "visible") (:data context))]
+  (let [props (:props markup)
+        value (read-token (get props "visible") (:data context))
+        action (get props "action" "popup-close")]
     (if value
       (div
        {:style {:position :fixed,
@@ -203,8 +212,7 @@
                 :overflow :auto,
                 :padding 32,
                 :background-color (hsl 0 0 0 0.7)},
-        :on-click (fn [e d! m!]
-          (on-action (or (get props "action") "backdrop-click") props))}
+        :on-click (fn [e d! m!] (on-action d! action props nil))}
        (list->
         (merge
          {:on-click (fn [e d! m!] )}
@@ -284,11 +292,12 @@
        (map (fn [[k child]] [k (render-markup child context on-action)]))))
 
 (defn render-box [markup context on-action]
-  (list->
-   (merge
-    (eval-attrs (:attrs markup) (:data context))
-    {:style (merge
-             (get-layout (:layout markup))
-             (style-presets (:presets markup))
-             (:style markup))})
-   (render-children (:children markup) context on-action)))
+  (let [props (:props markup)]
+    (list->
+     (merge
+      (eval-attrs (:attrs markup) (:data context))
+      {:style (merge
+               (get-layout (:layout markup))
+               (style-presets (:presets markup))
+               (:style markup))})
+     (render-children (:children markup) context on-action))))

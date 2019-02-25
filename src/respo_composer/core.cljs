@@ -118,16 +118,21 @@
         value (read-token (get props "value") (:data context))
         textarea? (some? (get props "textarea"))
         action (get props "action" "input")
-        listener (fn [e d! m!] (on-action d! action props e))]
+        listener (fn [e d! m!] (on-action d! action props e))
+        attrs (eval-attrs (:attrs markup) (:data context))]
     (if textarea?
       (textarea
-       {:value value,
-        :style (merge ui/textarea (style-presets (:presets markup)) (:style markup)),
-        :on-input listener})
+       (merge
+        attrs
+        {:value value,
+         :style (merge ui/textarea (style-presets (:presets markup)) (:style markup)),
+         :on-input listener}))
       (input
-       {:value value,
-        :style (merge ui/input (style-presets (:presets markup)) (:style markup)),
-        :on-input listener}))))
+       (merge
+        attrs
+        {:value value,
+         :style (merge ui/input (style-presets (:presets markup)) (:style markup)),
+         :on-input listener})))))
 
 (defn render-inspect [markup context]
   (let [props (:props markup), value (read-token (get props "title") (:data context))]
@@ -188,12 +193,19 @@
 (defn render-some [markup context on-action]
   (let [props (:props markup)
         value (read-token (get props "value") (:data context))
-        child-pair (->> (:children markup) (sort-by first) (vals))]
+        kind (read-token (get props "kind") (:data context))
+        child-pair (->> (:children markup) (sort-by first) (vals))
+        result (case kind
+                 "list" (empty? value)
+                 "boolean" (= value "false")
+                 "value" (nil? value)
+                 nil (nil? value)
+                 (nil? value))]
     (if (not= (count child-pair) 2)
       (do
        (js/console.warn "<Some> requires 2 children, but got" (count child-pair))
        (<> "<Bad some>"))
-      (if (nil? value)
+      (if result
         (render-markup (first child-pair) context on-action)
         (render-markup (last child-pair) context on-action)))))
 

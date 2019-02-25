@@ -27,7 +27,7 @@ Type       props              Action
 box
 space      width, height
 text       value
-some       value
+some       value, kind
 button     text               action
 link       text, href         action
 icon       name               action
@@ -59,6 +59,12 @@ data inside list children
 * `index`
 * `item`, list item
 * `outer`, data of outer context
+
+`some` instruction kinds:
+
+* `nil` or `"value"`, detect with `nil?`
+* `"list"`, detect with `empty?`
+* `"boolean"`, detect with `#(= "false" %)`
 
 ### Workflow
 

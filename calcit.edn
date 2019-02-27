@@ -5373,7 +5373,20 @@
                   :data {
                    "T" {:type :leaf, :by "rJG4IHzWf", :at 1551115751267, :text "=", :id "wNPrKRP8x"}
                    "j" {:type :leaf, :by "rJG4IHzWf", :at 1551115752293, :text "value", :id "-6GdjQ4GpO"}
-                   "r" {:type :leaf, :by "rJG4IHzWf", :at 1551115753230, :text "\"false", :id "k5U9_o8sHK"}
+                   "r" {:type :leaf, :by "rJG4IHzWf", :at 1551290939370, :text "false", :id "k5U9_o8sHK"}
+                  }
+                 }
+                }
+               }
+               "sT" {
+                :type :expr, :by "rJG4IHzWf", :at 1551290903943, :id "dEoY8GuKSF"
+                :data {
+                 "T" {:type :leaf, :by "rJG4IHzWf", :at 1551290903943, :text "\"string", :id "58VI1vnC9j"}
+                 "j" {
+                  :type :expr, :by "rJG4IHzWf", :at 1551290903943, :id "zdWKbLpCCo"
+                  :data {
+                   "T" {:type :leaf, :by "rJG4IHzWf", :at 1551290903943, :text "string/blank?", :id "P03czBL7u6"}
+                   "j" {:type :leaf, :by "rJG4IHzWf", :at 1551290903943, :text "value", :id "0LX1S8VFqP"}
                   }
                  }
                 }

@@ -197,7 +197,8 @@
         child-pair (->> (:children markup) (sort-by first) (vals))
         result (case kind
                  "list" (empty? value)
-                 "boolean" (= value "false")
+                 "boolean" (= value false)
+                 "string" (string/blank? value)
                  "value" (nil? value)
                  nil (nil? value)
                  (nil? value))]

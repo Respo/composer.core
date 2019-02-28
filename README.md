@@ -29,7 +29,7 @@ Composer Renderer
 Type       props              Action
 ----
 
-box
+box                           action
 space      width, height
 text       value
 some       value, kind

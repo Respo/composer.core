@@ -18,6 +18,11 @@ Composer Renderer
    :cursor %cursor)
 ```
 
+```clojure
+(respo-composer.core/extract-templates
+  (read-string (shadow.resource/inline "composer.edn")))
+```
+
 ### Specs
 
 ```

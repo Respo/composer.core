@@ -63,6 +63,13 @@
 (defn eval-attrs [attrs data]
   (->> attrs (map (fn [[k v]] [k (read-token v data)])) (into {})))
 
+(defn extract-templates [db]
+  (->> db
+       :templates
+       vals
+       (map (fn [template] [(:name template) (:markup template)]))
+       (into {})))
+
 (defn get-layout [layout]
   (case layout
     :row ui/row

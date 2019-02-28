@@ -14,28 +14,32 @@ Composer Renderer
 (respo-composer.core/render-markup markup
   {:data {}
    :level 1
-   :templates {"container" nil}})
+   :templates {"container" nil}}
+   :cursor %cursor)
 ```
 
 ### Specs
 
-Node type | `props`
---- | ---
-`box` | -
-`space` | `width`, `height`
-`text` | `value`
-`some` | `value`
-`button` | `action`, `text`
-`link` | `action`, `text`, `href`
-`icon` | `action`, `name`
-`template` | `name`, `data`
-`list` | `value`
-`input` |  `action`, `value`, `textarea`
-`slot` | `dom`
-`inspect` | `title`
-`popup` | `visible`
-`case` | `value`(?)
-`element` | 'name'
+```
+Type       props              Action
+----
+
+box
+space      width, height
+text       value
+some       value, kind
+button     text               action
+link       text, href         action
+icon       name               action
+template   name, data
+list       value
+input      value, textarea    action
+slot       dom
+inspect    title
+popup      visible
+case       value(?)
+element    name
+```
 
 For string values,
 
@@ -55,6 +59,12 @@ data inside list children
 * `index`
 * `item`, list item
 * `outer`, data of outer context
+
+`some` instruction kinds:
+
+* `nil` or `"value"`, detect with `nil?`
+* `"list"`, detect with `empty?`
+* `"boolean"`, detect with `#(= "false" %)`
 
 ### Workflow
 

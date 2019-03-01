@@ -63,6 +63,13 @@
 (defn eval-attrs [attrs data]
   (->> attrs (map (fn [[k v]] [k (read-token v data)])) (into {})))
 
+(defn extract-templates [db]
+  (->> db
+       :templates
+       vals
+       (map (fn [template] [(:name template) (:markup template)]))
+       (into {})))
+
 (defn get-layout [layout]
   (case layout
     :row ui/row
@@ -89,7 +96,7 @@
 (defn render-button [markup context on-action]
   (let [props (:props markup)
         text (read-token (get props "text") (:data context))
-        action (get props "action" "button-click")]
+        action (read-token (get props "action") (:data context))]
     (button
      (merge
       (eval-attrs (:attrs markup) (:data context))
@@ -305,12 +312,13 @@
        (map (fn [[k child]] [k (render-markup child context on-action)]))))
 
 (defn render-box [markup context on-action]
-  (let [props (:props markup)]
+  (let [props (:props markup), action (read-token (get props "action") (:data context))]
     (list->
      (merge
       (eval-attrs (:attrs markup) (:data context))
       {:style (merge
                (get-layout (:layout markup))
                (style-presets (:presets markup))
-               (:style markup))})
+               (:style markup)),
+       :on-click (if (some? action) (fn [e d! m!] (on-action d! action props e)))})
      (render-children (:children markup) context on-action))))

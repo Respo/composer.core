@@ -31,6 +31,7 @@ Type       props              Action
 
 box                           action
 space      width, height
+divider    kind, color
 text       value
 some       value, kind
 button     text               action
@@ -70,6 +71,16 @@ data inside list children
 * `nil` or `"value"`, detect with `nil?`
 * `"list"`, detect with `empty?`
 * `"boolean"`, detect with `#(= "false" %)`
+
+`space` props:
+
+* `width`, number
+* `height`, number
+
+`divider` props:
+
+* `kind`, defaults to horizontal, could be `vertical` or `v`
+* `color`, defaults to `#eee`
 
 ### Workflow
 

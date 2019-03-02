@@ -120,6 +120,15 @@
        :inner-text (or text "Submit"),
        :on-click (fn [e d! m!] (on-action d! action props nil))}))))
 
+(defn render-divider [markup]
+  (let [props (:props markup)
+        vertical? (contains? #{"vertical" "v"} (get props "kind"))
+        color (get props "color" "#eee")]
+    (div
+     {:style (if vertical?
+        {:background-color color, :width 1, :height "100%"}
+        {:background-color color, :height 1, :width "100%"})})))
+
 (defn render-icon [markup context on-action]
   (let [props (:props markup)
         icon-name (get props "name" "feather")
@@ -266,6 +275,7 @@
   (case (:type markup)
     :box (render-box markup context on-action)
     :space (render-space markup)
+    :divider (render-divider markup)
     :button (render-button markup context on-action)
     :icon (render-icon markup context on-action)
     :link (render-link markup context on-action)

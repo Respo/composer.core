@@ -18,7 +18,9 @@
                 "clojars" {:url "https://mirrors.ustc.edu.cn/clojars/"}}
  :open-file-command ["subl" ["%s:%s:%s" :file :line :column]]
  :nrepl false
+ :socket-repl {:port 0}
  :dev-http {7000 "target/"}
+ :socket-repl {:port 0}
  :builds {:client {:target :browser
                    :output-dir "target/"
                    :asset-path "./"

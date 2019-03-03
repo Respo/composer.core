@@ -112,13 +112,14 @@
 (defn render-button [markup context on-action]
   (let [props (:props markup)
         text (read-token (get props "text") (:data context))
-        action (read-token (get props "action") (:data context))]
+        action (read-token (get props "action") (:data context))
+        data (read-token (get props "data") (:data context))]
     (button
      (merge
       (eval-attrs (:attrs markup) (:data context))
       {:style (merge ui/button (style-presets (:presets markup)) (:style markup)),
        :inner-text (or text "Submit"),
-       :on-click (fn [e d! m!] (on-action d! action props nil))}))))
+       :on-click (fn [e d! m!] (on-action d! action props data))}))))
 
 (defn render-divider [markup]
   (let [props (:props markup)
@@ -135,20 +136,27 @@
         size (js/parseFloat (get props "size" "16"))
         color (get props "color" (hsl 200 80 70))
         obj (aget (.-icons icons) icon-name)
-        action (read-token (get props "action") (:data context))]
+        action (read-token (get props "action") (:data context))
+        data (read-token (get props "data") (:data context))]
     (if (some? obj)
       (i
        {:style {:display :inline-block, :cursor :pointer},
         :innerHTML (.toSvg obj (clj->js {:width size, :height size, :color color})),
-        :on-click (fn [e d! m!] (on-action d! action props nil))})
+        :on-click (fn [e d! m!] (on-action d! action props data))})
       (comp-invalid (str "No icon: " icon-name) props))))
 
 (defn render-input [markup context on-action]
   (let [props (:props markup)
         value (read-token (get props "value") (:data context))
         textarea? (some? (get props "textarea"))
-        action (get props "action" "input")
-        listener (fn [e d! m!] (on-action d! action props e))
+        action (or (read-token (get props "action") (:data context)) :input)
+        data (read-token (get props "data") (:data context))
+        listener (fn [e d! m!]
+                   (on-action
+                    d!
+                    action
+                    props
+                    {:text (:value e), :event (:event e), :data data}))
         attrs (eval-attrs (:attrs markup) (:data context))]
     (if textarea?
       (textarea
@@ -182,14 +190,15 @@
   (let [props (:props markup)
         text (read-token (get props "text") (:data context))
         href (read-token (get props "href") (:data context))
-        action (get props "action" "link-click")]
+        action (get props "action" "link-click")
+        data (read-token (get props "data") (:data context))]
     (a
      (merge
       (eval-attrs (:attrs markup) (:data context))
       {:style (merge ui/link (:style markup)),
        :inner-text (or text "Submit"),
        :href (or href "#"),
-       :on-click (fn [e d! m!] (on-action d! action props nil))}))))
+       :on-click (fn [e d! m!] (on-action d! action props data))}))))
 
 (defn render-slot [markup context on-action]
   (let [props (:props markup), dom (or (get props "dom") (:dom props))]
@@ -338,7 +347,9 @@
        (map (fn [[k child]] [k (render-markup child context on-action)]))))
 
 (defn render-box [markup context on-action]
-  (let [props (:props markup), action (read-token (get props "action") (:data context))]
+  (let [props (:props markup)
+        action (read-token (get props "action") (:data context))
+        data (read-token (get props "data") (:data context))]
     (list->
      (merge
       (eval-attrs (:attrs markup) (:data context))
@@ -346,5 +357,5 @@
                (get-layout (:layout markup))
                (style-presets (:presets markup))
                (:style markup)),
-       :on-click (if (some? action) (fn [e d! m!] (on-action d! action props e)))})
+       :on-click (if (some? action) (fn [e d! m!] (on-action d! action props data)))})
      (render-children (:children markup) context on-action))))

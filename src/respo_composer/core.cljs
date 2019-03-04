@@ -39,6 +39,19 @@
 
 (declare render-markup)
 
+(defcomp
+ comp-invalid
+ (title props)
+ (span
+  {:style {:color :white,
+           :cursor :pointer,
+           :background-color (hsl 0 80 50),
+           :font-size 13,
+           :padding "4px 4px",
+           :font-family ui/font-fancy},
+   :inner-text title,
+   :on-click (fn [e d! m!] (js/console.log (clj->js props)))}))
+
 (defn parse-token [x]
   (cond
     (string/starts-with? x ":") (keyword (subs x 1))
@@ -55,7 +68,10 @@
 (defn read-token [x scope]
   (if (string? x)
     (cond
-      (string/starts-with? x "@") (read-by-marks (string/split (subs x 1) " ") scope)
+      (string/starts-with? x "@")
+        (read-by-marks
+         (filter (fn [x] (not (string/blank? x))) (string/split (subs x 1) " "))
+         scope)
       (string/starts-with? x "~") (read-string (subs x 1))
       :else x)
     nil))
@@ -96,36 +112,51 @@
 (defn render-button [markup context on-action]
   (let [props (:props markup)
         text (read-token (get props "text") (:data context))
-        action (read-token (get props "action") (:data context))]
+        action (read-token (get props "action") (:data context))
+        data (read-token (get props "data") (:data context))]
     (button
      (merge
       (eval-attrs (:attrs markup) (:data context))
       {:style (merge ui/button (style-presets (:presets markup)) (:style markup)),
        :inner-text (or text "Submit"),
-       :on-click (fn [e d! m!] (on-action d! action props nil))}))))
+       :on-click (fn [e d! m!] (on-action d! action props data))}))))
 
-(defn render-icon [markup on-action]
+(defn render-divider [markup]
+  (let [props (:props markup)
+        vertical? (contains? #{"vertical" "v"} (get props "kind"))
+        color (get props "color" "#eee")]
+    (div
+     {:style (if vertical?
+        {:background-color color, :width 1, :height "100%"}
+        {:background-color color, :height 1, :width "100%"})})))
+
+(defn render-icon [markup context on-action]
   (let [props (:props markup)
         icon-name (get props "name" "feather")
         size (js/parseFloat (get props "size" "16"))
         color (get props "color" (hsl 200 80 70))
         obj (aget (.-icons icons) icon-name)
-        action (or (get props "action") "icon-click")]
+        action (read-token (get props "action") (:data context))
+        data (read-token (get props "data") (:data context))]
     (if (some? obj)
       (i
-       {:style {:display :inline-block},
+       {:style {:display :inline-block, :cursor :pointer},
         :innerHTML (.toSvg obj (clj->js {:width size, :height size, :color color})),
-        :on-click (fn [e d! m!] (on-action d! action props nil))})
-      (<>
-       (str "No icon: " icon-name)
-       {:color :white, :background-color :red, :font-size 12}))))
+        :on-click (fn [e d! m!] (on-action d! action props data))})
+      (comp-invalid (str "No icon: " icon-name) props))))
 
 (defn render-input [markup context on-action]
   (let [props (:props markup)
         value (read-token (get props "value") (:data context))
         textarea? (some? (get props "textarea"))
-        action (get props "action" "input")
-        listener (fn [e d! m!] (on-action d! action props e))
+        action (or (read-token (get props "action") (:data context)) :input)
+        data (read-token (get props "data") (:data context))
+        listener (fn [e d! m!]
+                   (on-action
+                    d!
+                    action
+                    props
+                    {:text (:value e), :event (:event e), :data data}))
         attrs (eval-attrs (:attrs markup) (:data context))]
     (if textarea?
       (textarea
@@ -159,14 +190,15 @@
   (let [props (:props markup)
         text (read-token (get props "text") (:data context))
         href (read-token (get props "href") (:data context))
-        action (get props "action" "link-click")]
+        action (get props "action" "link-click")
+        data (read-token (get props "data") (:data context))]
     (a
      (merge
       (eval-attrs (:attrs markup) (:data context))
       {:style (merge ui/link (:style markup)),
        :inner-text (or text "Submit"),
        :href (or href "#"),
-       :on-click (fn [e d! m!] (on-action d! action props nil))}))))
+       :on-click (fn [e d! m!] (on-action d! action props data))}))))
 
 (defn render-slot [markup context on-action]
   (let [props (:props markup), dom (or (get props "dom") (:dom props))]
@@ -174,7 +206,7 @@
       (component? dom) dom
       (element? dom) dom
       (some? dom) (<> (str "<Bad slot: " (pr-str dom) ">"))
-      :else (<> "<Empty slot>"))))
+      :else (comp-invalid "<Empty slot>" props))))
 
 (defn use-number [x] (if (nil? x) nil (js/parseFloat x)))
 
@@ -191,7 +223,7 @@
 (defn render-template [markup context on-action]
   (let [templates (:templates context), data (:data context), props (:props markup)]
     (if (> (:level context) 10)
-      (<> "<Bad template: too much levels>")
+      (comp-invalid "<Bad template: too much levels>" props)
       (render-markup
        (get templates (get props "name"))
        (-> context (assoc :data (read-token (get props "data") data)) (update :level inc))
@@ -200,7 +232,7 @@
 (defn render-some [markup context on-action]
   (let [props (:props markup)
         value (read-token (get props "value") (:data context))
-        kind (read-token (get props "kind") (:data context))
+        kind (get props "kind")
         child-pair (->> (:children markup) (sort-by first) (vals))
         result (case kind
                  "list" (empty? value)
@@ -212,7 +244,7 @@
     (if (not= (count child-pair) 2)
       (do
        (js/console.warn "<Some> requires 2 children, but got" (count child-pair))
-       (<> "<Bad some>"))
+       (comp-invalid "<Bad some>" props))
       (if result
         (render-markup (first child-pair) context on-action)
         (render-markup (last child-pair) context on-action)))))
@@ -252,8 +284,9 @@
   (case (:type markup)
     :box (render-box markup context on-action)
     :space (render-space markup)
+    :divider (render-divider markup)
     :button (render-button markup context on-action)
-    :icon (render-icon markup on-action)
+    :icon (render-icon markup context on-action)
     :link (render-link markup context on-action)
     :text (render-text markup context)
     :some (render-some markup context on-action)
@@ -264,16 +297,18 @@
     :popup (render-popup markup context on-action)
     :inspect (render-inspect markup context)
     :element (render-element markup context)
-    (div {:style style-unknown} (<> (str "Unknown type:" (:type markup))))))
+    (div
+     {:style style-unknown}
+     (comp-invalid (str "Bad type: " (pr-str (:type markup))) markup))))
 
 (defn render-list [markup context on-action]
   (let [props (:props markup)
         value (read-token (get props "value") (:data context))
         only-child (first (vals (:children markup)))]
     (cond
-      (not (sequential? value)) (<> (<< "<Bad list: ~(pr-str value)>"))
-      (> (count (:children markup)) 1) (<> "<Bad list: too many children>")
-      (nil? only-child) (<> (<< "<Bad list: no children>"))
+      (not (sequential? value)) (comp-invalid (<< "<Bad list: ~(pr-str value)>") props)
+      (> (count (:children markup)) 1) (comp-invalid "<Bad list: too many children>" props)
+      (nil? only-child) (comp-invalid (<< "<Bad list: no children>") props)
       :else
         (list->
          (merge
@@ -312,7 +347,9 @@
        (map (fn [[k child]] [k (render-markup child context on-action)]))))
 
 (defn render-box [markup context on-action]
-  (let [props (:props markup), action (read-token (get props "action") (:data context))]
+  (let [props (:props markup)
+        action (read-token (get props "action") (:data context))
+        data (read-token (get props "data") (:data context))]
     (list->
      (merge
       (eval-attrs (:attrs markup) (:data context))
@@ -320,5 +357,5 @@
                (get-layout (:layout markup))
                (style-presets (:presets markup))
                (:style markup)),
-       :on-click (if (some? action) (fn [e d! m!] (on-action d! action props e)))})
+       :on-click (if (some? action) (fn [e d! m!] (on-action d! action props data)))})
      (render-children (:children markup) context on-action))))

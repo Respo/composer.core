@@ -29,16 +29,17 @@ Composer Renderer
 Type       props              Action
 ----
 
-box                           action
+box                           action, data
 space      width, height
+divider    kind, color
 text       value
 some       value, kind
-button     text               action
-link       text, href         action
-icon       name               action
+button     text               action, data
+link       text, href         action, data
+icon       name               action, data
 template   name, data
 list       value
-input      value, textarea    action
+input      value, textarea    action, data
 slot       dom
 inspect    title
 popup      visible
@@ -70,6 +71,16 @@ data inside list children
 * `nil` or `"value"`, detect with `nil?`
 * `"list"`, detect with `empty?`
 * `"boolean"`, detect with `#(= "false" %)`
+
+`space` props:
+
+* `width`, number
+* `height`, number
+
+`divider` props:
+
+* `kind`, defaults to horizontal, could be `vertical` or `v`
+* `color`, defaults to `#eee`
 
 ### Workflow
 

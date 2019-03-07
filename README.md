@@ -7,7 +7,7 @@ Composer Renderer
 ### Usage
 
 ```edn
-[respo/composer "0.1.0-a1"]
+[respo/composer "0.1.0"]
 ```
 
 ```clojure

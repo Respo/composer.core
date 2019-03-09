@@ -26,20 +26,20 @@ Composer Renderer
 ### Specs
 
 ```
-Type       props              Action
+Type       props              Event
 ----
 
-box                           action, data
+box                           param
 space      width, height
 divider    kind, color
 text       value
 some       value, kind
-button     text               action, data
-link       text, href         action, data
-icon       name               action, data
+button     text               param
+link       text, href         param
+icon       name               param
 template   name, data
-list       value
-input      value, textarea    action, data
+list       value              param
+input      value, textarea    param
 slot       dom
 inspect    title
 popup      visible

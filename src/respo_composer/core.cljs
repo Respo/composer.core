@@ -72,7 +72,9 @@
         (read-by-marks
          (filter (fn [x] (not (string/blank? x))) (string/split (subs x 1) " "))
          scope)
+      (string/starts-with? x ":") (keyword (subs x 1))
       (string/starts-with? x "~") (read-string (subs x 1))
+      (string/starts-with? x "") (subs x 1)
       :else x)
     nil))
 
@@ -112,14 +114,19 @@
 (defn render-button [markup context on-action]
   (let [props (:props markup)
         text (read-token (get props "text") (:data context))
-        action (read-token (get props "action") (:data context))
-        data (read-token (get props "data") (:data context))]
+        param (read-token (get props "param") (:data context))]
     (button
      (merge
       (eval-attrs (:attrs markup) (:data context))
       {:style (merge ui/button (style-presets (:presets markup)) (:style markup)),
        :inner-text (or text "Submit"),
-       :on-click (fn [e d! m!] (on-action d! action props data))}))))
+       :on (->> (:event markup)
+                (map
+                 (fn [[name action]]
+                   [name
+                    (fn [e d! m!]
+                      (on-action d! (read-token action (:data context)) props param))]))
+                (into {}))}))))
 
 (defn render-divider [markup]
   (let [props (:props markup)
@@ -136,41 +143,52 @@
         size (js/parseFloat (get props "size" "16"))
         color (get props "color" (hsl 200 80 70))
         obj (aget (.-icons icons) icon-name)
-        action (read-token (get props "action") (:data context))
-        data (read-token (get props "data") (:data context))]
+        param (read-token (get props "param") (:data context))]
     (if (some? obj)
       (i
        {:style {:display :inline-block, :cursor :pointer},
         :innerHTML (.toSvg obj (clj->js {:width size, :height size, :color color})),
-        :on-click (fn [e d! m!] (on-action d! action props data))})
+        :on (->> (:event markup)
+                 (map
+                  (fn [[name action]]
+                    [name
+                     (fn [e d! m!]
+                       (on-action d! (read-token action (:data context)) props param))]))
+                 (into {}))})
       (comp-invalid (str "No icon: " icon-name) props))))
 
 (defn render-input [markup context on-action]
   (let [props (:props markup)
         value (read-token (get props "value") (:data context))
         textarea? (some? (get props "textarea"))
-        action (or (read-token (get props "action") (:data context)) :input)
-        data (read-token (get props "data") (:data context))
-        listener (fn [e d! m!]
-                   (on-action
-                    d!
-                    action
-                    props
-                    {:text (:value e), :event (:event e), :data data}))
-        attrs (eval-attrs (:attrs markup) (:data context))]
+        param (read-token (get props "param") (:data context))
+        attrs (eval-attrs (:attrs markup) (:data context))
+        event-map (->> (:event markup)
+                       (map
+                        (fn [[name action]]
+                          [name
+                           (fn [e d! m!]
+                             (on-action
+                              d!
+                              (read-token
+                               action
+                               {:text (:value e), :event (:event e), :data context})
+                              props
+                              param))]))
+                       (into {}))]
     (if textarea?
       (textarea
        (merge
         attrs
         {:value value,
          :style (merge ui/textarea (style-presets (:presets markup)) (:style markup)),
-         :on-input listener}))
+         :on event-map}))
       (input
        (merge
         attrs
         {:value value,
          :style (merge ui/input (style-presets (:presets markup)) (:style markup)),
-         :on-input listener})))))
+         :on event-map})))))
 
 (defn render-inspect [markup context]
   (let [props (:props markup), value (read-token (get props "title") (:data context))]
@@ -190,15 +208,20 @@
   (let [props (:props markup)
         text (read-token (get props "text") (:data context))
         href (read-token (get props "href") (:data context))
-        action (get props "action" "link-click")
-        data (read-token (get props "data") (:data context))]
+        param (read-token (get props "param") (:data context))]
     (a
      (merge
       (eval-attrs (:attrs markup) (:data context))
       {:style (merge ui/link (:style markup)),
        :inner-text (or text "Submit"),
        :href (or href "#"),
-       :on-click (fn [e d! m!] (on-action d! action props data))}))))
+       :on (->> (:event markup)
+                (map
+                 (fn [[name action]]
+                   [name
+                    (fn [e d! m!]
+                      (on-action d! (read-token action (:data context)) props param))]))
+                (into {}))}))))
 
 (defn render-slot [markup context on-action]
   (let [props (:props markup), dom (or (get props "dom") (:dom props))]
@@ -330,7 +353,8 @@
 (defn render-element [markup context on-action]
   (let [props (:props markup)
         value (read-token (get props "name") (:data context))
-        tag-name (keyword (or value "div"))]
+        tag-name (keyword (or value "div"))
+        param (read-token (get props "param") (:data context))]
     (create-list-element
      tag-name
      (merge
@@ -338,7 +362,14 @@
       {:style (merge
                (get-layout (:layout markup))
                (style-presets (:presets markup))
-               (:style markup))})
+               (:style markup)),
+       :on (->> (:event markup)
+                (map
+                 (fn [[name action]]
+                   [name
+                    (fn [e d! m!]
+                      (on-action d! (read-token action (:data context)) props param))]))
+                (into {}))})
      (render-children (:children markup) context on-action))))
 
 (defn render-children [children context on-action]
@@ -347,9 +378,7 @@
        (map (fn [[k child]] [k (render-markup child context on-action)]))))
 
 (defn render-box [markup context on-action]
-  (let [props (:props markup)
-        action (read-token (get props "action") (:data context))
-        data (read-token (get props "data") (:data context))]
+  (let [props (:props markup), param (read-token (get props "data") (:data context))]
     (list->
      (merge
       (eval-attrs (:attrs markup) (:data context))
@@ -357,5 +386,11 @@
                (get-layout (:layout markup))
                (style-presets (:presets markup))
                (:style markup)),
-       :on-click (if (some? action) (fn [e d! m!] (on-action d! action props data)))})
+       :on (->> (:event markup)
+                (map
+                 (fn [[name action]]
+                   [name
+                    (fn [e d! m!]
+                      (on-action d! (read-token action (:data context)) props param))]))
+                (into {}))})
      (render-children (:children markup) context on-action))))

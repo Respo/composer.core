@@ -68,9 +68,9 @@ data inside list children
 
 `some` instruction kinds:
 
-* `nil` or `"value"`, detect with `nil?`
-* `"list"`, detect with `empty?`
-* `"boolean"`, detect with `#(= "false" %)`
+* `nil` or `:value`, detect with `nil?`
+* `:list`, detect with `empty?`
+* `:boolean`, detect with `#(= "false" %)`
 
 `space` props:
 
@@ -79,7 +79,7 @@ data inside list children
 
 `divider` props:
 
-* `kind`, defaults to horizontal, could be `vertical` or `v`
+* `kind`, defaults to horizontal, could be `:vertical`
 * `color`, defaults to `#eee`
 
 ### Workflow

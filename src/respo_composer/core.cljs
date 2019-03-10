@@ -31,9 +31,13 @@
 
 (declare render-box)
 
+(declare read-token)
+
 (declare render-element)
 
 (declare render-template)
+
+(declare read-by-marks)
 
 (declare render-list)
 
@@ -52,31 +56,26 @@
    :inner-text title,
    :on-click (fn [e d! m!] (js/console.log (clj->js props)))}))
 
-(defn parse-token [x]
-  (cond
-    (string/starts-with? x ":") (keyword (subs x 1))
-    (string/starts-with? x "|") (subs x 1)
-    :else (do (js/console.error "Failed to parse token:" x) nil)))
+(defn read-token [x scope]
+  (if (string? x)
+    (cond
+      (string/starts-with? x "@")
+        (let [chunks (filter (fn [x] (not (string/blank? x))) (string/split (subs x 1) " "))]
+          (read-by-marks chunks scope))
+      (string/starts-with? x ":") (keyword (subs x 1))
+      (string/starts-with? x "~") (read-string (subs x 1))
+      (string/starts-with? x "|") (subs x 1)
+      (string/starts-with? x "\"") (subs x 1)
+      (re-matches (re-pattern "[\\d\\.]+") x) (js/parseFloat x)
+      :else x)
+    nil))
 
 (defn read-by-marks [xs scope]
   (if (nil? scope)
     nil
     (if (empty? xs)
       scope
-      (let [x (first xs), v (parse-token x)] (recur (rest xs) (get scope v))))))
-
-(defn read-token [x scope]
-  (if (string? x)
-    (cond
-      (string/starts-with? x "@")
-        (read-by-marks
-         (filter (fn [x] (not (string/blank? x))) (string/split (subs x 1) " "))
-         scope)
-      (string/starts-with? x ":") (keyword (subs x 1))
-      (string/starts-with? x "~") (read-string (subs x 1))
-      (string/starts-with? x "|") (subs x 1)
-      :else x)
-    nil))
+      (let [x (first xs), v (read-token x scope)] (recur (rest xs) (get scope v))))))
 
 (defn eval-attrs [attrs data]
   (->> attrs (map (fn [[k v]] [k (read-token v data)])) (into {})))
@@ -133,14 +132,16 @@
        :inner-text (or text "Submit"),
        :on event-map}))))
 
-(defn render-divider [markup]
+(defn render-divider [markup context]
   (let [props (:props markup)
-        vertical? (contains? #{"vertical" "v"} (get props "kind"))
+        vertical? (contains?
+                   #{:vertical :v}
+                   (read-token (get props "kind") (:data context)))
         color (get props "color" "#eee")]
     (div
      {:style (if vertical?
-        {:background-color color, :width 1, :height "100%"}
-        {:background-color color, :height 1, :width "100%"})})))
+        {:background-color color, :width 1, :height "auto"}
+        {:background-color color, :height 1, :width "auto"})})))
 
 (defn render-icon [markup context on-action]
   (let [props (:props markup)
@@ -247,11 +248,11 @@
       (some? dom) (<> (str "<Bad slot: " (pr-str dom) ">"))
       :else (comp-invalid "<Empty slot>" props))))
 
-(defn use-number [x] (if (nil? x) nil (js/parseFloat x)))
-
-(defn render-space [markup]
-  (let [props (:props markup)]
-    (=< (use-number (get props "width")) (use-number (get props "height")))))
+(defn render-space [markup context]
+  (let [props (:props markup)
+        width (read-token (get props "width") (:data context))
+        height (read-token (get props "height") (:data context))]
+    (=< width height)))
 
 (defn render-text [markup context]
   (let [props (:props markup), value (read-token (get props "value") (:data context))]
@@ -271,13 +272,13 @@
 (defn render-some [markup context on-action]
   (let [props (:props markup)
         value (read-token (get props "value") (:data context))
-        kind (get props "kind")
+        kind (read-token (get props "kind") (:data context))
         child-pair (->> (:children markup) (sort-by first) (vals))
         result (case kind
-                 "list" (empty? value)
-                 "boolean" (= value false)
-                 "string" (string/blank? value)
-                 "value" (nil? value)
+                 :list (empty? value)
+                 :boolean (= value false)
+                 :string (string/blank? value)
+                 :value (nil? value)
                  nil (nil? value)
                  (nil? value))]
     (if (not= (count child-pair) 2)
@@ -322,8 +323,8 @@
 (defn render-markup [markup context on-action]
   (case (:type markup)
     :box (render-box markup context on-action)
-    :space (render-space markup)
-    :divider (render-divider markup)
+    :space (render-space markup context)
+    :divider (render-divider markup context)
     :button (render-button markup context on-action)
     :icon (render-icon markup context on-action)
     :link (render-link markup context on-action)

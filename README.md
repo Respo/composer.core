@@ -26,20 +26,20 @@ Composer Renderer
 ### Specs
 
 ```
-Type       props              Action
+Type       props              Event
 ----
 
-box                           action, data
+box                           param
 space      width, height
 divider    kind, color
 text       value
 some       value, kind
-button     text               action, data
-link       text, href         action, data
-icon       name               action, data
+button     text               param
+link       text, href         param
+icon       name               param
 template   name, data
-list       value
-input      value, textarea    action, data
+list       value              param
+input      value, textarea    param
 slot       dom
 inspect    title
 popup      visible
@@ -68,9 +68,9 @@ data inside list children
 
 `some` instruction kinds:
 
-* `nil` or `"value"`, detect with `nil?`
-* `"list"`, detect with `empty?`
-* `"boolean"`, detect with `#(= "false" %)`
+* `nil` or `:value`, detect with `nil?`
+* `:list`, detect with `empty?`
+* `:boolean`, detect with `#(= "false" %)`
 
 `space` props:
 
@@ -79,7 +79,7 @@ data inside list children
 
 `divider` props:
 
-* `kind`, defaults to horizontal, could be `vertical` or `v`
+* `kind`, defaults to horizontal, could be `:vertical`
 * `color`, defaults to `#eee`
 
 ### Workflow

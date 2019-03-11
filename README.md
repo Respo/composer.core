@@ -6,17 +6,22 @@ Composer Renderer
 
 ### Usage
 
+[![Clojars Project](https://img.shields.io/clojars/v/respo/composer.svg)](https://clojars.org/respo/composer)
+
 ```edn
-[respo/composer "0.1.0"]
+[respo/composer "0.1.1"]
 ```
 
 ```clojure
 (respo-composer.core/render-markup markup
   {:data {}
    :level 1
-   :templates {"container" nil}}
-   :cursor %cursor)
+   :templates {"container" nil}
+   :cursor %cursor}
+  (fn [dispatch! op param options]))
 ```
+
+`options` contains `:event :props :data`.
 
 ```clojure
 (respo-composer.core/extract-templates
@@ -47,16 +52,18 @@ case       value(?)
 element    name
 ```
 
-For string values,
+Props supports values in simple syntaxes:
 
-* ones that start with `@` will be read as values
 * `:x` would be read as a keyword `:x`
-* `|x` would be read as a string `"x"`
-
-for example,
-
+* `"x` and `|x` would be read as a string `"x"`
+* `8` is just a number
 * `a`, means "a"
+* `~:a` will be parsed into `:a`
+
+and `@` is the instruction to read from data:
+
 * `@:a`, means `(get-in data [:a])`
+* `@:a :b` is like `(get-in scope [:a :b])`
 * `@|a`, means `(get-in data ["a"])`
 * `@:a :b |c`, means `(get-in data [:a :b "c"])`
 

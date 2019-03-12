@@ -50,6 +50,7 @@ inspect    title
 popup      visible
 case       value(?)
 element    name
+markdown   text, class
 ```
 
 Props supports values in simple syntaxes:

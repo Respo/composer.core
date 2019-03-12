@@ -20,7 +20,8 @@
             [respo-ui.core :as ui]
             [clojure.string :as string]
             [cljs.reader :refer [read-string]]
-            [respo.util.detect :refer [component? element?]])
+            [respo.util.detect :refer [component? element?]]
+            [respo-md.comp.md :refer [comp-md-block]])
   (:require-macros [clojure.core.strint :refer [<<]]))
 
 (declare render-some)
@@ -240,6 +241,15 @@
        :href (or href "#"),
        :on event-map}))))
 
+(defn render-markdown [markup context]
+  (let [props (:props markup)
+        value (read-token (get props "text") (:data context))
+        class-name (get props "class")]
+    (comp-md-block
+     value
+     {:style (merge (style-presets (:presets markup)) (:style markup)),
+      :class-name class-name})))
+
 (defn render-slot [markup context on-action]
   (let [props (:props markup), dom (or (get props "dom") (:dom props))]
     (cond
@@ -337,6 +347,7 @@
     :popup (render-popup markup context on-action)
     :inspect (render-inspect markup context)
     :element (render-element markup context)
+    :markdown (render-markdown markup context)
     (div
      {:style style-unknown}
      (comp-invalid (str "Bad type: " (pr-str (:type markup))) markup))))

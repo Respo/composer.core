@@ -1,8 +1,7 @@
 
-Composer Renderer
-----
+> Check [Composer](https://github.com/Respo/composer) if you want to read source code. This is a repo only for documentations. However this repo contains an older version of respo-composer.core.
 
-> Renderer library for Respo Composer
+## Composer Renderer, Renderer library for Respo Composer
 
 ### Usage
 

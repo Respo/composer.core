@@ -50,6 +50,7 @@ popup      visible
 case       value(?)
 element    name
 markdown   text, class
+image      src, mode, width, height
 ```
 
 Props supports values in simple syntaxes:

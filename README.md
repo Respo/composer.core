@@ -29,29 +29,26 @@
 
 ### Specs
 
-```
-Type       props              Event
-----
-
-box                           param
-space      width, height
-divider    kind, color
-text       value
-some       value, kind
-button     text               param
-link       text, href         param
-icon       name               param
-template   name, data
-list       value              param
-input      value, textarea    param
-slot       dom
-inspect    title
-popup      visible
-case       value(?)
-element    name
-markdown   text, class
-image      src, mode, width, height
-```
+Type | props | Event
+--- | --- | ---
+box | | param
+space | width, height
+divider | kind, color
+text | value, data
+some | value, kind
+button | text | param
+link | text, href | param
+icon | name | | param
+template | name, data |
+list | value | param
+input | value, textarea | param
+slot | dom
+inspect | title
+popup | visible
+case | value, options
+element | name
+markdown | text, class
+image | src, mode, width, height
 
 Props supports values in simple syntaxes:
 

@@ -8,7 +8,7 @@
 [![Clojars Project](https://img.shields.io/clojars/v/respo/composer.svg)](https://clojars.org/respo/composer)
 
 ```edn
-[respo/composer "0.1.1"]
+[respo/composer "0.1.10"]
 ```
 
 ```clojure
@@ -38,17 +38,18 @@ text | value, data
 some | value, kind
 button | text | param
 link | text, href | param
-icon | name | | param
+icon | name, size, color | param
 template | name, data |
 list | value | param
 input | value, textarea | param
-slot | dom
-inspect | title
+function | name | param
+inspect | value
 popup | visible
 case | value, options
-element | name
+element | name | param
 markdown | text, class
 image | src, mode, width, height
+case | value, options
 
 Props supports values in simple syntaxes:
 
@@ -74,7 +75,8 @@ data inside list children
 `some` instruction kinds:
 
 * `nil` or `:value`, detect with `nil?`
-* `:list`, detect with `empty?`
+* `:list`, `:map`, detect with `empty?`
+* `:string`, detect with `not . string/blank?`
 * `:boolean`, detect with `#(= "false" %)`
 
 `space` props:

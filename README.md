@@ -16,16 +16,23 @@
   {:data {}
    :level 1
    :templates {"container" nil}
-   :cursor %cursor}
-  (fn [dispatch! op param options]))
+
+   ; states options
+   :state-fns {}
+   :state-path []
+   :states []}
+
+  (fn [dispatch! op context options]))
 ```
 
-`options` contains `:event :props :data`.
+`options` contains `:event :props :data :param`.
 
 ```clojure
 (respo-composer.core/extract-templates
   (read-string (shadow.resource/inline "composer.edn")))
 ```
+
+States mechanism is currently being explored, check [example in composer-todolist](https://github.com/Erigeron/composer-todolist/blob/master/src/app/vm.cljs).
 
 ### Specs
 
@@ -65,6 +72,10 @@ and `@` is the instruction to read from data:
 * `@:a :b` is like `(get-in scope [:a :b])`
 * `@|a`, means `(get-in data ["a"])`
 * `@:a :b |c`, means `(get-in data [:a :b "c"])`
+
+`#` is the instruction for reading states:
+
+* `#:a`, means `(get-in (:data states) [:a])`
 
 data inside list children
 
